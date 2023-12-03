@@ -2,7 +2,7 @@
     <thead>
     <tr class="group">
         @if($this->canSelect())
-            <th class="p-0 text-left text-black bg-neutral-50 dark:text-white dark:bg-gray-800">
+            <th class="p-0 text-left text-black bg-neutral-50 dark:text-white dark:bg-neutral-800">
                 <input type="checkbox" wire:model.live="selectedPage"
                        @click="selectall=!selectall"
                        class="h-4 w-4 mx-3">
@@ -10,18 +10,18 @@
         @endif
         @foreach($table['columns'] as $column)
             @continue(! in_array($column->code(), $this->columns))
-            <th class="p-0 text-left text-black bg-neutral-50 dark:text-white dark:bg-gray-800">
+            <th class="p-0 text-left text-black bg-neutral-50 dark:text-white dark:bg-neutral-800">
                 {{ $column->renderHeader() }}
             </th>
         @endforeach
     </tr>
     <tr class="group">
         @if($this->canSelect())
-            <th class="p-0 text-left text-black bg-neutral-50 dark:text-white dark:bg-gray-800"></th>
+            <th class="p-0 text-left text-black bg-neutral-50 dark:text-white dark:bg-neutral-800"></th>
         @endif
         @foreach($table['columns'] as $column)
             @continue(! in_array($column->code(), $this->columns))
-            <th class="p-0 text-left text-black bg-neutral-50 dark:text-white dark:bg-gray-800">
+            <th class="p-0 text-left text-black bg-neutral-50 dark:text-white dark:bg-neutral-800">
                 @if($column->isSearchable())
                     {{ $column->renderSearch() }}
                 @endif
