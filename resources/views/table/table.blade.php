@@ -1,25 +1,27 @@
-<table class="w-full relative" x-data="{ selected: @entangle('selected') }">
-    <thead class="border-b border-neutral-200 dark:border-neutral-700">
+<table class="w-full relative" x-data="{ selected: @entangle('selected').live, selectall: false }">
+    <thead>
     <tr class="group">
         @if($this->canSelect())
-            <th class="p-0 text-left text-black bg-neutral-50 dark:text-white dark:bg-neutral-800">
-                <input type="checkbox" wire:model.live="selectedPage" class="h-4 w-4 mx-3">
+            <th class="p-0 text-left text-black bg-neutral-50 dark:text-white dark:bg-gray-800">
+                <input type="checkbox" wire:model.live="selectedPage"
+                       @click="selectall=!selectall"
+                       class="h-4 w-4 mx-3">
             </th>
         @endif
         @foreach($table['columns'] as $column)
             @continue(! in_array($column->code(), $this->columns))
-            <th class="p-0 text-left text-black bg-neutral-50 dark:text-white dark:bg-neutral-800">
+            <th class="p-0 text-left text-black bg-neutral-50 dark:text-white dark:bg-gray-800">
                 {{ $column->renderHeader() }}
             </th>
         @endforeach
     </tr>
     <tr class="group">
         @if($this->canSelect())
-            <th class="p-0 text-left text-black bg-neutral-50 dark:text-white dark:bg-neutral-800"></th>
+            <th class="p-0 text-left text-black bg-neutral-50 dark:text-white dark:bg-gray-800"></th>
         @endif
         @foreach($table['columns'] as $column)
             @continue(! in_array($column->code(), $this->columns))
-            <th class="p-0 text-left text-black bg-neutral-50 dark:text-white dark:bg-neutral-800">
+            <th class="p-0 text-left text-black bg-neutral-50 dark:text-white dark:bg-gray-800">
                 @if($column->isSearchable())
                     {{ $column->renderSearch() }}
                 @endif
@@ -43,16 +45,16 @@
 
                 @if($this->isReordering())
                     draggable="true"
-                    x-on:dragstart="e => e.dataTransfer.setData('key', '{{ $item->getKey() }}')"
-                    x-on:dragover.prevent=""
-                    x-on:drop="e => {
-                        $wire.call(
-                            'reorderItem',
-                            e.dataTransfer.getData('key'),
-                            '{{ $item->getKey() }}',
-                            e.target.offsetHeight / 2 > e.offsetY
-                        )
-                    }"
+                x-on:dragstart="e => e.dataTransfer.setData('key', '{{ $item->getKey() }}')"
+                x-on:dragover.prevent=""
+                x-on:drop="e => {
+                                $wire.call(
+                                    'reorderItem',
+                                    e.dataTransfer.getData('key'),
+                                    '{{ $item->getKey() }}',
+                                    e.target.offsetHeight / 2 > e.offsetY
+                                )
+                            }"
                 @endif
             >
                 @if($this->canSelect())
@@ -61,7 +63,12 @@
                                 ? 'bg-blue-100 group-odd:bg-blue-100 group-hover:bg-blue-200 dark:bg-blue-900 dark:group-odd:bg-blue-900 dark:group-hover:bg-blue-800'
                                 : 'bg-neutral-100 group-odd:bg-white group-hover:bg-neutral-200 dark:bg-neutral-800 dark:group-odd:bg-neutral-900 dark:group-hover:bg-neutral-700'">
                         <div class="mx-3">
-                            <input type="checkbox" wire:model.live="selected" value="{{ $item->getKey() }}" class="h-4 w-4">
+                            <input type="checkbox"
+                                   x-ref="checkbox{{ $item->getKey() }}"
+                                   wire:model.live="selected"
+                                   x-bind:checked="selectall"
+                                   value="{{ $item->getKey() }}"
+                                   class="h-4 w-4">
                         </div>
                     </td>
                 @endif
@@ -71,9 +78,9 @@
                         @if($column->isClickable() && ! $this->isReordering())
                             @if(($link = $this->link($item)) !== null)
                                 x-on:click.prevent="window.location.href = '{{ $link }}'"
-                            @elseif($this->canSelect())
-                                x-on:click="$wire.selectItem('{{ $item->getKey() }}')"
-                            @endif
+                        @elseif($this->canSelect())
+                            x-on:click="$wire.selectItem('{{ $item->getKey() }}');$refs.checkbox{{ $item->getKey() }}.checked = $refs.checkbox{{ $item->getKey() }}.checked =! $refs.checkbox{{ $item->getKey() }}.checked"
+                        @endif
                         @endif
                         x-bind:class="~selected.indexOf('{{ $item->getKey() }}')
                                 ? 'select-none cursor-pointer bg-blue-100 group-odd:bg-blue-100 group-hover:bg-blue-200 dark:bg-blue-900 dark:group-odd:bg-blue-900 dark:group-hover:bg-blue-800'
@@ -85,7 +92,8 @@
         @empty
             <tr class="group">
                 <td class="p-0" colspan="{{ $table['columns']->count() + 1 }}">
-                    <span class="block text-lg text-center py-20 bg-white text-black dark:bg-neutral-900 dark:text-white">
+                    <span
+                        class="block text-lg text-center py-20 bg-white text-black dark:bg-neutral-900 dark:text-white">
                         @lang('No results')
                     </span>
                 </td>
